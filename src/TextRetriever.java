@@ -1,38 +1,29 @@
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
  * Created by Bamba on 09/12/2016.
  */
 public class TextRetriever {
-    private URL url;
-    private BufferedReader bR;
 
-    Jsoup
 
-    public TextRetriever (String strUrl){
+    static public List<String> wikiTextByWord(String strUrl){
         try{
-            url = new URL(strUrl);
-            bR = new BufferedReader(new InputStreamReader(url.openStream()));
-        }catch(MalformedURLException mURLe){
-            //blabla
-        }catch(Exception e){
-            //blabla
-        }
-    }
+            Document doc = Jsoup.connect(strUrl).get();
+            return Arrays.asList(doc.getElementById("mw-content-text").text().replaceAll("'", " ").replaceAll("[\\S&&\\W]*", "").split(" "));
 
-    public String readLine()  {
-        try{
-            return bR.readLine();
+        }catch (IOException ioe){
+           ioe.printStackTrace();
         }
-        catch(Exception e){
-            return null;
-        }
+        return null;
     }
-
 }

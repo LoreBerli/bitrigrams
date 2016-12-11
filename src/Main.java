@@ -1,26 +1,119 @@
-import java.io.BufferedWriter;
-import java.io.*;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 /**
  * Created by Bamba on 09/12/2016.
  */
 public class Main {
-    public static void main(String[] args) throws IOException {
-        TextRetriever textRetriever = new TextRetriever("https://en.wikipedia.org/wiki/N-gram");
+    private static CountDownLatch cdl;
+    private static final int nTasks = 8;
+    private static final int iter = 500000;
 
-        File file = new File("file.html");
-        BufferedWriter bW = new BufferedWriter(new FileWriter("file.html"));
+    static class Task implements Runnable{
+        private Record[] recs;
+        private int i;
 
-        String line;
-        int i = 0;
-        while((line = textRetriever.readLine()) != null){
-            System.out.println(i++);
-            bW.append(line);
+        Task(Record[] r, int id){
+            recs = r;
+            i = id;
         }
 
+        @Override
+        public void run() {
+            //System.out.println("start thread " + i + "...");
+/*
+            for (int j = i; j < recs.length; j+= nTasks ){
+                recs[j].add();
+                recs[j].count();
+
+            }
+            */
+            //System.out.println("stop thread " + i +".");
+
+            for (int j = i*(recs.length/nTasks); j < (i+1)*(recs.length/nTasks); j++){
+                recs[j].add();
+                recs[j].count();
+            }
+            cdl.countDown();
+
+        }
     }
+
+
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        ExecutorService exe = Executors.newFixedThreadPool(4);
+        exe.execute(new MediatorTask(5));
+
+
+
+/*
+        Document doc = Jsoup.connect("https://it.wikipedia.org/wiki/Esplorazioni_geografiche").get();
+        String x = doc.getElementById("mw-content-text").text();
+        System.out.println(doc.getElementById("mw-content-text").text().split(" ").length);
+        System.out.println(x);*/
+
+
+
+    }
+
+    static float test2() throws InterruptedException {
+        cdl = new CountDownLatch(nTasks);
+        Record[] recs = new Record[iter];
+
+        for (int i = 0; i< iter; i++){
+            ArrayList<String> as = new ArrayList<String>();
+            as.add(Integer.toString(i));
+            Record r = new Record(as);
+            recs[i] = r;
+        }
+
+        System.out.println("init seq test");
+
+        float sssum = 0;
+
+        long sstime = System.nanoTime();
+        for (int i = 0; i < recs.length; i++){
+            recs[i].add();
+            sssum += recs[i].count();
+        }
+        long selap = System.nanoTime() - sstime;
+
+        System.out.println("Seq ex time - " + (float)selap / 1000000000);
+        //System.out.println();
+
+
+
+        ExecutorService exe = Executors.newFixedThreadPool(nTasks );
+        Task[] ts = new Task[nTasks ];
+        for(int i = 0; i < nTasks ; i++){
+            ts[i] = new Main.Task(recs, i);
+        }
+        long pstime = System.nanoTime();
+        for(int i = 0; i < nTasks ; i++){
+            exe.execute(ts[i]);
+        }
+        try{
+            cdl.await();
+        }catch (Exception e ){}
+
+        long pelap = System.nanoTime() -pstime;
+        System.out.println("Par ex time - " + (float) pelap / 1000000000);
+
+
+        for(Record r : recs){
+            if(r.count()!= 2){
+                return -1000000;
+            }
+        }
+
+        exe.shutdown();
+        return (float)selap/pelap;
+    }
+
 
 }
