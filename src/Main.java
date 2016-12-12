@@ -1,101 +1,61 @@
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.concurrent.CountDownLatch;
+import java.awt.*;
+import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 
 /**
  * Created by Bamba on 09/12/2016.
  */
+
 public class Main {
-    private static CountDownLatch cdl;
-    private static final int nTasks = 8;
-    private static final int iter = 500000;
-
-    static class Task implements Runnable{
-        private Record[] recs;
-        private int i;
-
-        Task(Record[] r, int id){
-            recs = r;
-            i = id;
-        }
-
-        @Override
-        public void run() {
-            for (int j = i*(recs.length/nTasks); j < (i+1)*(recs.length/nTasks); j++){
-                recs[j].add();
-                recs[j].count();
-            }
-            cdl.countDown();
-
-        }
+    public static void main(String[] args) throws Exception {
+        //parallelMain();
+        sequentialMain();
     }
 
 
+    public static void parallelMain() throws Exception{
+        BufferedReader reader = new BufferedReader(new FileReader(new File("config.txt")));
 
-    public static void main(String[] args) throws IOException, InterruptedException {
         ExecutorService exe = Executors.newFixedThreadPool(4);
-        exe.execute(new MediatorTask(5));
-        Thread.sleep(1000);
-        exe.shutdown();
-
+        String line;
+        while(( line = reader.readLine())!= null ){
+            exe.execute(new MediatorTask(5, line));
+        }
+        //exe.shutdown();
     }
 
-    static float test2() throws InterruptedException {
-        cdl = new CountDownLatch(nTasks);
-        Record[] recs = new Record[iter];
+    public static void sequentialMain() throws Exception{
+        int pageNotRetrieved = 0;
 
-        for (int i = 0; i< iter; i++){
-            ArrayList<String> as = new ArrayList<String>();
-            as.add(Integer.toString(i));
-            Record r = new Record(as);
-            recs[i] = r;
-        }
+        BufferedReader reader = new BufferedReader(new FileReader(new File("config.txt")));
+        String line;
 
-        System.out.println("init seq test");
-
-        float sssum = 0;
-
+        System.out.println("Start...");
         long sstime = System.nanoTime();
-        for (int i = 0; i < recs.length; i++){
-            recs[i].add();
-            sssum += recs[i].count();
-        }
-        long selap = System.nanoTime() - sstime;
-
-        System.out.println("Seq ex time - " + (float)selap / 1000000000);
-        //System.out.println();
-
-
-
-        ExecutorService exe = Executors.newFixedThreadPool(nTasks );
-        Task[] ts = new Task[nTasks ];
-        for(int i = 0; i < nTasks ; i++){
-            ts[i] = new Main.Task(recs, i);
-        }
-        long pstime = System.nanoTime();
-        for(int i = 0; i < nTasks ; i++){
-            exe.execute(ts[i]);
-        }
-        try{
-            cdl.await();
-        }catch (Exception e ){}
-
-        long pelap = System.nanoTime() -pstime;
-        System.out.println("Par ex time - " + (float) pelap / 1000000000);
-
-
-        for(Record r : recs){
-            if(r.count()!= 2){
-                return -1000000;
+        while(( line = reader.readLine())!= null ){
+            try{
+                List<String> text = TextRetriever.wikiTextByWord(line);
+                ConsumerDummy consumerDummy = new ConsumerDummy(2);
+                consumerDummy.consume(text);
+            }catch(Exception e){
+                pageNotRetrieved++;
             }
-        }
 
-        exe.shutdown();
-        return (float)selap/pelap;
+
+        }
+        long sselap = System.nanoTime() - sstime;
+
+        System.out.println((float) sselap /1000000000);
+        System.out.println("Pages not retrieved " + pageNotRetrieved);
     }
+
 
 
 }
+
+

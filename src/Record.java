@@ -50,7 +50,8 @@ public class Record {
         }
     }
 
-
-
+    List<String> getId(){
+        return id;
+    }
 
 }
