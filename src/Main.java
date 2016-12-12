@@ -24,16 +24,6 @@ public class Main {
 
         @Override
         public void run() {
-            //System.out.println("start thread " + i + "...");
-/*
-            for (int j = i; j < recs.length; j+= nTasks ){
-                recs[j].add();
-                recs[j].count();
-
-            }
-            */
-            //System.out.println("stop thread " + i +".");
-
             for (int j = i*(recs.length/nTasks); j < (i+1)*(recs.length/nTasks); j++){
                 recs[j].add();
                 recs[j].count();
@@ -48,16 +38,8 @@ public class Main {
     public static void main(String[] args) throws IOException, InterruptedException {
         ExecutorService exe = Executors.newFixedThreadPool(4);
         exe.execute(new MediatorTask(5));
-
-
-
-/*
-        Document doc = Jsoup.connect("https://it.wikipedia.org/wiki/Esplorazioni_geografiche").get();
-        String x = doc.getElementById("mw-content-text").text();
-        System.out.println(doc.getElementById("mw-content-text").text().split(" ").length);
-        System.out.println(x);*/
-
-
+        Thread.sleep(1000);
+        exe.shutdown();
 
     }
 

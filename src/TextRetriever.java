@@ -19,8 +19,7 @@ public class TextRetriever {
     static public List<String> wikiTextByWord(String strUrl){
         try{
             Document doc = Jsoup.connect(strUrl).get();
-            return Arrays.asList(doc.getElementById("mw-content-text").text().replaceAll("'", " ").replaceAll("[\\S&&\\W]*", "").split(" "));
-
+            return Arrays.asList(doc.getElementById("mw-content-text").text().replaceAll("[^\\p{IsAlphabetic}]"," ").replaceAll(" +"," ").split(" "));
         }catch (IOException ioe){
            ioe.printStackTrace();
         }
