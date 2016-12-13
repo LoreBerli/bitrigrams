@@ -15,14 +15,19 @@ import java.util.concurrent.Executors;
 
 public class Main {
     private final static String filename = "config.txt";
-    private final static int numOfthreads = 16;
+    private final static int numOfthreads = 4;
+
+
+    private static long timepar = 0;
+    private static long timeseq = 0;
 
 
     public static void main(String[] args) throws Exception {
         RecordHashMap r1 = parallelMain();
         RecordHashMap r2 = sequentialMain();
 
-        System.out.println("Sono " + (r2.equals(r1)? " uguali" : "diverse"));
+        System.out.println("Sono " + (r2.reallyEquals(r1)? " uguali" : "diverse"));
+        System.out.println("Speedup: " + (float)timeseq/timepar);
     }
 
 
@@ -35,11 +40,11 @@ public class Main {
         BufferedReader reader = new BufferedReader(new FileReader(new File(filename)));
 
         ExecutorService exe = Executors.newFixedThreadPool(numOfthreads);
-
         MediatorTask.cdl = new CountDownLatch(lnnum*(numOfthreads+1)); // # of lines * (k+1)
 
         System.out.println("Start parallel");
         String line;
+
         long pstime = System.nanoTime();
         while(( line = reader.readLine())!= null ){
             MediatorTask m = new MediatorTask(numOfthreads, line, exe);
@@ -48,10 +53,12 @@ public class Main {
         try{
             MediatorTask.cdl.await();
         }catch (Exception e){}
+        timepar = System.nanoTime() - pstime;
 
-        long pelap = System.nanoTime() - pstime;
-        System.out.println((float) pelap /1000000000);
-        System.out.println(MediatorTask.recs);
+
+        System.out.println((float) timepar /1000000000);
+        System.out.println(MediatorTask.recs.size());
+        //System.out.println(MediatorTask.recs);
 
         exe.shutdown();
         return MediatorTask.recs;
@@ -65,27 +72,24 @@ public class Main {
 
         System.out.println("Start sequential");
         String line;
+
         long sstime = System.nanoTime();
         while(( line = reader.readLine())!= null ){
             try{
-                List<String> text = TextRetriever.wikiTextByWord(line);
+                //List<String> text = TextRetriever.wikiTextByWord(line);
+                List<String> text = TextRetriever.wikiTextCached(line);
                 NgramTask ngramTask = new NgramTask(text, 2, result);
                 ngramTask.buildHistogram(text);
             }catch(Exception e){
                 pageNotRetrieved++;
             }
-
-
         }
-        long sselap = System.nanoTime() - sstime;
+        timeseq = System.nanoTime() - sstime;
 
-        System.out.println((float) sselap /1000000000);
+        System.out.println((float) timeseq /1000000000);
         System.out.println("Pages not retrieved " + pageNotRetrieved);
         return result;
     }
-
-
-
 }
 
 
