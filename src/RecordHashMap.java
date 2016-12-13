@@ -20,13 +20,11 @@ public class RecordHashMap extends ConcurrentHashMap<List<String>,Integer> {
     }
 
     public void containsAndUpdate(List<String> gram){
-
         wLock.lock();
         try {
             if(super.containsKey(gram)){
                 super.replace(gram,super.get(gram)+1);
             }else{add(gram);}
-
         } finally {
             wLock.unlock();
         }
@@ -40,6 +38,25 @@ public class RecordHashMap extends ConcurrentHashMap<List<String>,Integer> {
         } finally {
             wLock.unlock();
         }
+    }
+
+    @Override public boolean equals(Object other){
+        if(!(other instanceof RecordHashMap))
+            return false;
+
+        RecordHashMap o = (RecordHashMap)other;
+        if(o.size() != this.size())
+            return false;
+
+        for(Entry<List<String>, Integer> entry : this.entrySet()){
+            if(!o.containsKey(entry.getKey()))
+                return false;
+
+            if(!o.get(entry.getKey()).equals(entry.getValue()))
+                return false;
+        }
+        return true;
+
     }
 
 }

@@ -15,7 +15,8 @@ public class TextRetriever {
             Document doc = Jsoup.connect(strUrl).get();
             return Arrays.asList(doc.getElementById("mw-content-text").text().replaceAll("[^\\p{IsAlphabetic}]"," ").replaceAll(" +"," ").split(" "));
         }catch (IOException ioe){
-           ioe.printStackTrace();
+            System.out.println("Can't connect");
+            ioe.printStackTrace();
         }
         return null;
     }

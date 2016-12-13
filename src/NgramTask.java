@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Created by cioni on 11/12/16.
@@ -10,6 +11,8 @@ public class NgramTask implements Runnable{
     private List<String> text=new ArrayList<>();
     private int gram;
     private RecordHashMap hist;
+
+    CountDownLatch cdl; //TODO
 
     public NgramTask(List<String> text, int gram, RecordHashMap map){
         this.text=text;
@@ -26,9 +29,8 @@ public class NgramTask implements Runnable{
 
     @Override
     public void run(){
-        System.out.println(text.toString());
         buildHistogram(text);
-        return;
+        cdl.countDown(); //TODO
     }
 
 }
