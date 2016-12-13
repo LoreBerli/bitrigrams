@@ -35,7 +35,8 @@ public class MediatorTask implements Runnable{
     }
 
     List<String> getText(){
-        text = TextRetriever.wikiTextByWord(url);
+        //text = TextRetriever.wikiTextByWord(url);
+        text = TextRetriever.wikiTextCached(url);
 
         return text;
     }
