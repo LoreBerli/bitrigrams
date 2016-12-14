@@ -1,6 +1,4 @@
-import java.awt.*;
 import java.io.LineNumberReader;
-import java.util.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -14,9 +12,11 @@ import java.util.concurrent.Executors;
  */
 
 public class Main {
-    private final static String filename = "config.txt";
-    private final static int numOfthreads = 4;
+    public final static boolean useCache = true;
 
+    private final static String filename = "wikifiles.txt";
+    private final static int numOfthreads = 12;
+    private final static int gram = 3;
 
     private static long timepar = 0;
     private static long timeseq = 0;
@@ -40,6 +40,7 @@ public class Main {
         BufferedReader reader = new BufferedReader(new FileReader(new File(filename)));
 
         ExecutorService exe = Executors.newFixedThreadPool(numOfthreads);
+        MediatorTask.setGram(gram);
         MediatorTask.cdl = new CountDownLatch(lnnum*(numOfthreads+1)); // # of lines * (k+1)
 
         System.out.println("Start parallel");
@@ -52,7 +53,7 @@ public class Main {
         }
         try{
             MediatorTask.cdl.await();
-        }catch (Exception e){}
+        }catch (Exception e){System.out.println("oh");}
         timepar = System.nanoTime() - pstime;
 
 
@@ -68,7 +69,7 @@ public class Main {
         int pageNotRetrieved = 0;
         RecordHashMap result = new RecordHashMap();
 
-        BufferedReader reader = new BufferedReader(new FileReader(new File("config.txt")));
+        BufferedReader reader = new BufferedReader(new FileReader(new File("wikifiles.txt")));
 
         System.out.println("Start sequential");
         String line;
@@ -76,9 +77,11 @@ public class Main {
         long sstime = System.nanoTime();
         while(( line = reader.readLine())!= null ){
             try{
-                //List<String> text = TextRetriever.wikiTextByWord(line);
-                List<String> text = TextRetriever.wikiTextCached(line);
-                NgramTask ngramTask = new NgramTask(text, 2, result);
+                List<String> text = useCache ?
+                        TextRetriever.wikiTextCached(line):
+                        TextRetriever.wikiTextByWord(line);
+
+                NgramTask ngramTask = new NgramTask(text, gram, result);
                 ngramTask.buildHistogram(text);
             }catch(Exception e){
                 pageNotRetrieved++;
@@ -87,6 +90,7 @@ public class Main {
         timeseq = System.nanoTime() - sstime;
 
         System.out.println((float) timeseq /1000000000);
+        System.out.println(result.size());
         System.out.println("Pages not retrieved " + pageNotRetrieved);
         return result;
     }

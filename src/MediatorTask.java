@@ -10,6 +10,8 @@ public class MediatorTask implements Runnable{
     static RecordHashMap recs;
     static CountDownLatch cdl;//TODO
 
+    static int gram = 2;
+
     private int numReaders;
     private String url;
     private List<String> text;
@@ -27,17 +29,20 @@ public class MediatorTask implements Runnable{
     @Override public void run(){
         getText();
         for(int i = 0, l = Math.floorDiv(text.size(),numReaders)+1; i < numReaders; i++){
-            NgramTask ngramTask = new NgramTask(text.subList(i*l,Math.min((i+1)*l + 1,text.size())), 2, recs);
+            NgramTask ngramTask = new NgramTask(text.subList(i*l,Math.min((i+1)*l + MediatorTask.gram - 1,text.size())), MediatorTask.gram, recs);
             ngramTask.cdl = MediatorTask.cdl; //TODO
             exe.execute(ngramTask);
         }
         cdl.countDown(); //TODO
     }
 
-    List<String> getText(){
-        //text = TextRetriever.wikiTextByWord(url);
-        text = TextRetriever.wikiTextCached(url);
-
+    List<String> getText() {
+        text = Main.useCache ?
+                TextRetriever.wikiTextCached(url) :
+                TextRetriever.wikiTextByWord(url);
         return text;
+    }
+    static public void setGram(int g){
+        MediatorTask.gram = g;
     }
 }

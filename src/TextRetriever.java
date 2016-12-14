@@ -100,7 +100,7 @@ public class TextRetriever {
 
     public static void main(String[] args){
         try{
-            BufferedReader reader = new BufferedReader(new FileReader(new File("config.txt")));
+            BufferedReader reader = new BufferedReader(new FileReader(new File("wikifiles.txt")));
 
             String line = "";
             while ((line=reader.readLine()) != null){
