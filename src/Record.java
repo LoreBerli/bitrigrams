@@ -29,6 +29,7 @@ public class Record {
     public int count(){
         return count;
     }
+    public List<String> id(){return id;}
 
 
     @Override public int hashCode(){

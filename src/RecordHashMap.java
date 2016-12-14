@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RecordHashMap{
     private ConcurrentHashMap<Record, Record> map;
 
-
     public RecordHashMap(){
         map = new ConcurrentHashMap<Record, Record>();
     }
@@ -33,6 +32,10 @@ public class RecordHashMap{
             }
         }
         return true;
+    }
+
+    public ConcurrentHashMap<Record, Record> mapAccess(MCTextGen2Grams.KeysToTheMap key){
+        return key == null ? null : this.map;
     }
 
 
