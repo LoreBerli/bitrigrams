@@ -15,12 +15,11 @@ public class Main {
     public final static boolean useCache = true;
 
     private final static String filename = "wikifiles.txt";
-    private final static int numOfthreads = 12;
+    private final static int numOfthreads = 16;
     private final static int gram = 3;
 
     private static long timepar = 0;
     private static long timeseq = 0;
-
 
     public static void main(String[] args) throws Exception {
         RecordHashMap r1 = parallelMain();
@@ -32,7 +31,6 @@ public class Main {
 
 
     public static RecordHashMap parallelMain() throws Exception{
-        //get number of lines
         LineNumberReader lnr = new LineNumberReader(new FileReader(new File(filename)));
         lnr.skip(Long.MAX_VALUE);
         int lnnum = lnr.getLineNumber()+1;
@@ -59,7 +57,6 @@ public class Main {
 
         System.out.println((float) timepar /1000000000);
         System.out.println(MediatorTask.recs.size());
-        //System.out.println(MediatorTask.recs);
 
         exe.shutdown();
         return MediatorTask.recs;

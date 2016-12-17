@@ -18,7 +18,7 @@ public class MediatorTask implements Runnable{
     private ExecutorService exe;
 
     public MediatorTask(int n, String url, ExecutorService exe){
-        if(recs == null)
+         if(recs == null)
             recs = new RecordHashMap();
 
         this.exe = exe;
@@ -29,9 +29,15 @@ public class MediatorTask implements Runnable{
     @Override public void run(){
         getText();
         for(int i = 0, l = Math.floorDiv(text.size(),numReaders)+1; i < numReaders; i++){
-            NgramTask ngramTask = new NgramTask(text.subList(i*l,Math.min((i+1)*l + MediatorTask.gram - 1,text.size())), MediatorTask.gram, recs);
-            ngramTask.cdl = MediatorTask.cdl; //TODO
-            exe.execute(ngramTask);
+            if(i*l < Math.min((i+1)*l + MediatorTask.gram - 1,text.size())){
+                NgramTask ngramTask = new NgramTask(text.subList(i*l,Math.min((i+1)*l + MediatorTask.gram - 1,text.size())), MediatorTask.gram, recs);
+                ngramTask.cdl = MediatorTask.cdl; //TODO
+                exe.execute(ngramTask);
+            }
+            else{
+                cdl.countDown();
+            }
+
         }
         cdl.countDown(); //TODO
     }

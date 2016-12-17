@@ -102,12 +102,11 @@ public class TextRetriever {
         try{
             BufferedReader reader = new BufferedReader(new FileReader(new File("wikifiles.txt")));
 
-            String line = "";
+            String line;
             while ((line=reader.readLine()) != null){
                 genCache(line);
             }
         }catch (Exception e){}
-
 
     }
 
