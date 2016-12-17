@@ -2,6 +2,8 @@ import java.io.LineNumberReader;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -14,14 +16,29 @@ import java.util.concurrent.Executors;
 public class Main {
     public final static boolean useCache = true;
 
+    private  static int numOfTries = 50;
+
     private final static String filename = "wikifiles.txt";
-    private final static int numOfthreads = 16;
+    private final static int numOfthreads = 4;
     private final static int gram = 3;
 
     private static long timepar = 0;
     private static long timeseq = 0;
 
-    public static void main(String[] args) throws Exception {
+
+    public static void main(String[]args) throws Exception{
+
+        List<Float> speedups = new ArrayList<Float>(numOfTries);
+        for(int i = 0; i < numOfTries; i++){
+            __main();
+            speedups.add(i, new Float((float)timeseq/timepar));
+        }
+
+        System.out.println("Speedup medio su " + numOfTries + " tentativi: " + speedups.stream().reduce(0f, (a,b)-> a+b) / numOfTries);
+    }
+
+
+    public static void __main() throws Exception {
         RecordHashMap r1 = parallelMain();
         RecordHashMap r2 = sequentialMain();
 
@@ -78,7 +95,8 @@ public class Main {
                         TextRetriever.wikiTextCached(line):
                         TextRetriever.wikiTextByWord(line);
 
-                NgramTask ngramTask = new NgramTask(text, gram, result);
+                //NgramTask ngramTask = new NgramTask(text, gram, result);
+                NgramTask ngramTask = new NgramTask(text, 0, 1, gram, result);
                 ngramTask.buildHistogram(text);
             }catch(Exception e){
                 pageNotRetrieved++;

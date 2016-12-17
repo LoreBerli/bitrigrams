@@ -30,7 +30,10 @@ public class MediatorTask implements Runnable{
         getText();
         for(int i = 0, l = Math.floorDiv(text.size(),numReaders)+1; i < numReaders; i++){
             if(i*l < Math.min((i+1)*l + MediatorTask.gram - 1,text.size())){
-                NgramTask ngramTask = new NgramTask(text.subList(i*l,Math.min((i+1)*l + MediatorTask.gram - 1,text.size())), MediatorTask.gram, recs);
+                //NgramTask ngramTask = new NgramTask(text.subList(i*l,Math.min((i+1)*l + MediatorTask.gram - 1,text.size())), MediatorTask.gram, recs);
+
+                NgramTask ngramTask = new NgramTask(text, i, numReaders, MediatorTask.gram, recs);
+
                 ngramTask.cdl = MediatorTask.cdl; //TODO
                 exe.execute(ngramTask);
             }
