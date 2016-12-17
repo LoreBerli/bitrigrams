@@ -35,7 +35,7 @@ public class ExampleMain {
 
         for(int j=0;j<PROD;j++){
             taskQue.add(new MediatorTask(3, "", Executors.newFixedThreadPool(12)));
-            taskQue.add(new NgramTask(test,3,gramsSet));
+            //taskQue.add(new NgramTask(test,3,gramsSet));
         }
 
         for(Runnable t:taskQue){
