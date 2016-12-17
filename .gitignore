@@ -83,3 +83,4 @@ bitrigrams.iml
 *.html
 out/production/bitrigrams/ConcurrentRecordHashSet.class
 *.class
+*.txt

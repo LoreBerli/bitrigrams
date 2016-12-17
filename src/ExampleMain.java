@@ -25,22 +25,26 @@ public class ExampleMain {
 //        }
 //
 //    }
-    public  static  void main(String[] args){
+    public  static  void main(String[] args){ //deprecato
         int PROD=3;
         ExecutorService executor = Executors.newFixedThreadPool(5);
         List<String> test =loadFromFile("src/speeches.txt");
+
         RecordHashMap gramsSet = new RecordHashMap();
         Queue<Runnable> taskQue = new ConcurrentLinkedQueue<>();
+
         for(int j=0;j<PROD;j++){
-            taskQue.add(new MediatorTask(3));
+            taskQue.add(new MediatorTask(3, "", Executors.newFixedThreadPool(12)));
             taskQue.add(new NgramTask(test,3,gramsSet));
         }
+
         for(Runnable t:taskQue){
             executor.execute(t);
         }
+
         executor.shutdown();
         while(!executor.isTerminated()){}
-        gramsSet.forEach((K,V)->{System.out.println(K+"= "+V.toString());});
+        //gramsSet.forEach((K,V)->{System.out.println(K+"= "+V.toString());});
 
     }
 

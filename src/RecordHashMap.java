@@ -1,45 +1,55 @@
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 
 /**
  * Created by cioni on 12/12/16.
  */
-public class RecordHashMap extends ConcurrentHashMap<List<String>,Integer> {
-    private ReentrantReadWriteLock lock;
-    protected Lock rLock;
+public class RecordHashMap{
+    private ConcurrentHashMap<Record, Record> map;
 
-
-    protected Lock wLock;
     public RecordHashMap(){
-        super();
-        this.lock = new ReentrantReadWriteLock();
-        this.rLock= lock.readLock();
-        this.wLock=lock.writeLock();
+        map = new ConcurrentHashMap<Record, Record>();
     }
 
     public void containsAndUpdate(List<String> gram){
-
-        wLock.lock();
-        try {
-            if(super.containsKey(gram)){
-                super.replace(gram,super.get(gram)+1);
-            }else{add(gram);}
-
-        } finally {
-            wLock.unlock();
-        }
+        Record r = new Record(gram);
+        map.putIfAbsent(r, r);
+        map.get(r).oneMore();
     }
 
 
-    public void add(List<String> ls){
-        wLock.lock();
-        try {
-            super.put(ls,1);
-        } finally {
-            wLock.unlock();
+    public int size(){
+        return map.size();
+    }
+    public boolean reallyEquals(RecordHashMap other){
+        if(!this.equals(other))
+            return false;
+
+        for(Map.Entry<Record, Record> e : this.map.entrySet()){
+            if(!(other.map.get(e.getKey()).count() == e.getValue().count())){
+                return false;
+            }
         }
+        return true;
+    }
+
+    public ConcurrentHashMap<Record, Record> mapAccess(MCTextGen2Grams.KeysToTheMap key){
+        return key == null ? null : this.map;
+    }
+
+
+
+    @Override public boolean equals(Object other){
+        return other != null && other instanceof RecordHashMap && (((RecordHashMap) other).map).equals(this.map);
+    }
+    @Override public String toString(){
+        //return this.map.values().stream().map(Record::toString).reduce("", (s1, s2)->s1 + " | " + s2);
+        String str = "";
+        for (Map.Entry<Record, Record> e : map.entrySet()){
+            str+= e.getValue().toString() + " | ";
+        }
+        return str;
     }
 
 }
