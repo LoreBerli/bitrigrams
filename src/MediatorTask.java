@@ -10,7 +10,7 @@ public class MediatorTask implements Runnable{
     static RecordHashMap recs;
     static CountDownLatch cdl;//TODO
 
-    static int gram = 2;
+    private static int gram;
 
     private int numReaders;
     private String url;
@@ -28,27 +28,33 @@ public class MediatorTask implements Runnable{
 
     @Override public void run(){
         getText();
-        for(int i = 0, l = Math.floorDiv(text.size(),numReaders)+1; i < numReaders; i++){
-            if(i*l < Math.min((i+1)*l + MediatorTask.gram - 1,text.size())){
-                //NgramTask ngramTask = new NgramTask(text.subList(i*l,Math.min((i+1)*l + MediatorTask.gram - 1,text.size())), MediatorTask.gram, recs);
+
+        for(int i = 0; i < numReaders; i++){
 
                 NgramTask ngramTask = new NgramTask(text, i, numReaders, MediatorTask.gram, recs);
 
                 ngramTask.cdl = MediatorTask.cdl; //TODO
                 exe.execute(ngramTask);
             }
-            else{
-                cdl.countDown();
-            }
 
-        }
         cdl.countDown(); //TODO
     }
 
     List<String> getText() {
-        text = Main.useCache ?
-                TextRetriever.wikiTextCached(url) :
-                TextRetriever.wikiTextByWord(url);
+
+        String u = url.replaceAll("[\\/\\.:]", "_");
+        switch (Main.mode){
+            case "ram":
+                text = TextRetriever.fromStash(u);
+                break;
+            case "disk":
+                text = TextRetriever.wikiTextCached(url);
+                break;
+            case "online":
+                text = TextRetriever.wikiTextByWord(url);
+                break;
+        }
+
         return text;
     }
     static public void setGram(int g){

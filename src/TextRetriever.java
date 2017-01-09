@@ -3,8 +3,11 @@ import org.jsoup.nodes.Document;
 
 import java.io.*;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -12,10 +15,7 @@ import java.util.List;
  */
 public class TextRetriever {
     static private String escChar = " ";
-
-
-
-
+    static public ConcurrentHashMap<String,List<String>> stash;
 
     static public List<String> wikiTextByWord(String strUrl){
         try{
@@ -30,10 +30,30 @@ public class TextRetriever {
         return null;
     }
 
+    static public List<String> fromStash(String url){
+        return stash.get(url.replaceAll("[\\/\\.:]", "_"));
+    }
+    static public void buildFiles() {
+        try{
+            System.out.println("TextRetirever.buildFiles()");
+        BufferedReader reader = new BufferedReader(new FileReader(new File("/home/cioni/git/bitrigrams/src/wikifiles.txt")));
+        String line;
+        ConcurrentHashMap<String,List<String>> stash= new ConcurrentHashMap<String,List<String>>(700,0.75f,16);
+        while(( line = reader.readLine())!= null ) {
+            String name = line.replaceAll("[\\/\\.:]", "_");
+            stash.put(name,wikiTextCached(line));
+        }
+        TextRetriever.stash=stash;
+        }
+        catch (IOException ioe){System.out.println(ioe);}
+
+    }
+
+
     static public List<String> wikiTextCached(String strUrl){
         String name = strUrl.replaceAll("[\\/\\.:]", "_");
         try{
-            BufferedReader bfr = new BufferedReader(new FileReader(new File("cache/" + name + ".html")));
+            BufferedReader bfr = new BufferedReader(new FileReader(new File("src/cache/" + name + ".html")));
 
             String s = "";
             String line = "";
@@ -42,7 +62,7 @@ public class TextRetriever {
             }
             return Arrays.asList(s.split(escChar));
         }catch (IOException ioe){
-            System.out.println("Can didio");
+            System.out.println(ioe);
         }
         return null;
     }
@@ -60,10 +80,12 @@ public class TextRetriever {
     public static void genCache(String strUrl) {
         String name = strUrl.replaceAll("[\\/\\.:]", "_");
         System.out.println("name " + name);
-        File file = new File( "cache\\" + name + ".html");
+        File file = new File( "src/cache/" + name + ".html");
         try {
             file.createNewFile();
         }catch (IOException ioe){
+            System.out.println(file);
+            System.out.println(ioe);
         }
 
 
@@ -100,7 +122,7 @@ public class TextRetriever {
 
     public static void main(String[] args){
         try{
-            BufferedReader reader = new BufferedReader(new FileReader(new File("wikifiles.txt")));
+            BufferedReader reader = new BufferedReader(new FileReader(new File("/home/cioni/git/bitrigrams/src/wikifiles.txt")));
 
             String line;
             while ((line=reader.readLine()) != null){

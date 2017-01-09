@@ -21,18 +21,11 @@ public class NgramTask implements Runnable{
         this.text=text;
         this.gram=gram;
         this.hist=map;
-
         this.id = id;
         this.numOfThreads = numOfThreads;
     }
 
     public void buildHistogram(List<String> words){
-        /*for(int i=0;i<words.size()-gram+1;i++){
-            List<String> s=words.subList(i,i+gram);
-            hist.containsAndUpdate(s);
-            }
-        */
-
         for(int i= id; i < words.size() - (gram + 1) ; i+=numOfThreads ){
             List<String> s = words.subList(i, i + gram);
             hist.containsAndUpdate(s);
