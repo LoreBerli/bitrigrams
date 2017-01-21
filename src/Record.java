@@ -12,6 +12,7 @@ public class Record {
     private List<String> id;
     private ReentrantLock lock;
 
+
     public Record(List<String> id){
         this.id = id;
         count = 0;

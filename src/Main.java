@@ -15,14 +15,17 @@ import java.util.concurrent.Executors;
 
 public class Main {
     //public final static boolean useCache = true;
-    public final static String mode="ram"; // ram,disk,online
-    private  static int numOfTries = 10;
+    public final static String mode = "ram"; // ram,disk,online
 
     private final static String filename = "wikifiles.txt";
+
+    private final static int[] threads={2,4,6,8};
+    private final static int[] grams={2,3};
+
+    private static int numOfTries = 10;
     private static int numOfthreads;
     private static int gram;
-    private static final int[] threads={2,4,6,8};
-    private static final int[] grams={2,3};
+
     private static long timepar = 0;
     private static long timeseq = 0;
 
