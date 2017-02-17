@@ -30,12 +30,11 @@ public class MediatorTask implements Runnable{
         getText();
 
         for(int i = 0; i < numReaders; i++){
+            NgramTask ngramTask = new NgramTask(text, i, numReaders, MediatorTask.gram, recs);
 
-                NgramTask ngramTask = new NgramTask(text, i, numReaders, MediatorTask.gram, recs);
-
-                ngramTask.cdl = MediatorTask.cdl; //TODO
-                exe.execute(ngramTask);
-            }
+            ngramTask.cdl = MediatorTask.cdl; //TODO
+            exe.execute(ngramTask);
+        }
 
         cdl.countDown(); //TODO
     }

@@ -1,5 +1,7 @@
 import java.util.List;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 
 /**
@@ -10,26 +12,42 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Record {
     private int count;
     private List<String> id;
-    private ReentrantLock lock;
+    //private ReentrantLock lock;
+    private ReadWriteLock lock;
 
     public Record(List<String> id){
         this.id = id;
         count = 0;
-        lock = new ReentrantLock();
+        //lock = new ReentrantLock();
+        lock = new ReentrantReadWriteLock();
     }
 
     public void oneMore(){
-        lock.lock();
+        lock.writeLock().lock();
         try{
             count++;
         }finally {
-            lock.unlock();
+            lock.writeLock().unlock();
         }
     }
     public int count(){
-        return count;
+        lock.readLock().lock();
+        try{
+            return count;
+        } finally {
+            lock.readLock().unlock();
+        }
+
     }
-    public List<String> id(){return id;}
+    public List<String> id(){
+        lock.readLock().lock();
+        try{
+            return id;
+        }
+        finally {
+            lock.readLock().unlock();
+        }
+    }
 
 
     @Override public int hashCode(){

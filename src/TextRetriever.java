@@ -14,6 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by Bamba on 09/12/2016.
  */
 public class TextRetriever {
+    static private final String dir = "";
+
     static private String escChar = " ";
     static public ConcurrentHashMap<String,List<String>> stash;
 
@@ -36,14 +38,14 @@ public class TextRetriever {
     static public void buildFiles() {
         try{
             System.out.println("TextRetirever.buildFiles()");
-        BufferedReader reader = new BufferedReader(new FileReader(new File("/home/cioni/git/bitrigrams/src/wikifiles.txt")));
-        String line;
-        ConcurrentHashMap<String,List<String>> stash= new ConcurrentHashMap<String,List<String>>(700,0.75f,16);
-        while(( line = reader.readLine())!= null ) {
-            String name = line.replaceAll("[\\/\\.:]", "_");
-            stash.put(name,wikiTextCached(line));
-        }
-        TextRetriever.stash=stash;
+            BufferedReader reader = new BufferedReader(new FileReader(new File("wikifiles.txt")));
+            String line;
+            ConcurrentHashMap<String,List<String>> stash= new ConcurrentHashMap<String,List<String>>(700,0.75f,16);
+            while(( line = reader.readLine())!= null ) {
+                String name = line.replaceAll("[\\/\\.:]", "_");
+                stash.put(name,wikiTextCached(line));
+            }
+            TextRetriever.stash=stash;
         }
         catch (IOException ioe){System.out.println(ioe);}
 
@@ -53,7 +55,7 @@ public class TextRetriever {
     static public List<String> wikiTextCached(String strUrl){
         String name = strUrl.replaceAll("[\\/\\.:]", "_");
         try{
-            BufferedReader bfr = new BufferedReader(new FileReader(new File("src/cache/" + name + ".html")));
+            BufferedReader bfr = new BufferedReader(new FileReader(new File("cache/" + name + ".html")));
 
             String s = "";
             String line = "";
